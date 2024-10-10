@@ -1,126 +1,107 @@
 import { useState } from 'react';
-import { Form, Input, Button, Select, Radio, Upload, message } from 'antd';
-import axios from 'axios';
-import { UploadOutlined } from '@ant-design/icons';
+import { Form, Input, Button, message } from 'antd';
 
-const { Option } = Select;
+const EmployeeForm = () => {
+  const [responseData, setResponseData] = useState(null);
+  const [error, setError] = useState(null);
 
-const EmployeeForm = ({ employee = {}, isEdit = false }) => {
-    const [loading, setLoading] = useState(false);
-    const [form] = Form.useForm();
-
-    const handleSubmit = async (values) => {
-        setLoading(true);
-        try {
-            if (isEdit) {
-                await axios.put(`/api/employees/${employee._id}`, values);
-                message.success('Employee updated');
-            } else {
-                await axios.post('/api/employees', values);
-                message.success('Employee created');
-            }
-        } catch (error) {
-            message.error('Error in submission');
-        } finally {
-            setLoading(false);
-        }
+  const handleSubmit = async (values) => {
+    const employeeData = {
+      f_Name: values.fName,
+      f_Email: values.fEmail,
+      f_Mobile: values.fMobile,
+      f_Designation: values.fDesignation,
+      f_gender: values.fGender,
+      f_Course: values.fCourse,
     };
 
-    return (
-        <div className="flex justify-center items-center min-h-screen bg-gray-100">
-            <Form
-                form={form}
-                layout="vertical"
-                onFinish={handleSubmit}
-                className="bg-white p-8 shadow-lg rounded-md w-96"
-                initialValues={employee}
-            >
-                <h2 className="text-2xl font-bold mb-6 text-center">
-                    {isEdit ? 'Edit Employee' : 'Create Employee'}
-                </h2>
+    try {
+      const response = await fetch('http://localhost:5000/api/employees', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(employeeData),
+      });
 
-                <Form.Item
-                    name="f_Name"
-                    label="Name"
-                    rules={[{ required: true, message: 'Please input employee name!' }]}
-                >
-                    <Input placeholder="Enter name" />
-                </Form.Item>
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
 
-                <Form.Item
-                    name="f_Email"
-                    label="Email"
-                    rules={[{ required: true, type: 'email', message: 'Please input a valid email!' }]}
-                >
-                    <Input placeholder="Enter email" />
-                </Form.Item>
+      const data = await response.json();
+      setResponseData(data);
+      message.success('Employee added successfully!');
+    } catch (error) {
+      setError(error.message);
+      message.error(`Error: ${error.message}`);
+    }
+  };
 
-                <Form.Item
-                    name="f_Mobile"
-                    label="Mobile"
-                    rules={[{ required: true, message: 'Please input mobile number!' }]}
-                >
-                    <Input placeholder="Enter mobile number" />
-                </Form.Item>
-
-                <Form.Item
-                    name="f_Designation"
-                    label="Designation"
-                    rules={[{ required: true, message: 'Please select designation!' }]}
-                >
-                    <Select placeholder="Select designation">
-                        <Option value="HR">HR</Option>
-                        <Option value="Manager">Manager</Option>
-                        <Option value="Sales">Sales</Option>
-                    </Select>
-                </Form.Item>
-
-                <Form.Item
-                    name="f_gender"
-                    label="Gender"
-                    rules={[{ required: true, message: 'Please select gender!' }]}
-                >
-                    <Radio.Group>
-                        <Radio value="Male">Male</Radio>
-                        <Radio value="Female">Female</Radio>
-                    </Radio.Group>
-                </Form.Item>
-
-                <Form.Item
-                    name="f_Course"
-                    label="Course"
-                    rules={[{ required: true, message: 'Please input course!' }]}
-                >
-                    <Input placeholder="Enter course" />
-                </Form.Item>
-
-                <Form.Item
-                    name="f_Image"
-                    label="Upload Image"
-                >
-                    <Upload
-                        name="f_Image"
-                        listType="picture"
-                        maxCount={1}
-                        beforeUpload={() => false} // Disable automatic upload
-                    >
-                        <Button icon={<UploadOutlined />}>Click to Upload</Button>
-                    </Upload>
-                </Form.Item>
-
-                <Form.Item>
-                    <Button
-                        type="primary"
-                        htmlType="submit"
-                        loading={loading}
-                        block
-                    >
-                        {isEdit ? 'Update Employee' : 'Create Employee'}
-                    </Button>
-                </Form.Item>
-            </Form>
+  return (
+    <div className="container mx-auto p-6">
+      <h1 className="text-2xl font-bold mb-4">Add Employee</h1>
+      <Form
+        layout="vertical"
+        onFinish={handleSubmit}
+        className="bg-white shadow-md rounded-lg p-6"
+      >
+        <Form.Item
+          label="Full Name"
+          name="fName"
+          rules={[{ required: true, message: 'Please input the full name!' }]}
+        >
+          <Input className="border border-gray-300 rounded p-2" />
+        </Form.Item>
+        <Form.Item
+          label="Email"
+          name="fEmail"
+          rules={[{ required: true, message: 'Please input a valid email!', type: 'email' }]}
+        >
+          <Input className="border border-gray-300 rounded p-2" />
+        </Form.Item>
+        <Form.Item
+          label="Mobile"
+          name="fMobile"
+          rules={[{ required: true, message: 'Please input the mobile number!' }]}
+        >
+          <Input className="border border-gray-300 rounded p-2" />
+        </Form.Item>
+        <Form.Item
+          label="Designation"
+          name="fDesignation"
+          rules={[{ required: true, message: 'Please input the designation!' }]}
+        >
+          <Input className="border border-gray-300 rounded p-2" />
+        </Form.Item>
+        <Form.Item
+          label="Gender"
+          name="fGender"
+          rules={[{ required: true, message: 'Please input the gender!' }]}
+        >
+          <Input className="border border-gray-300 rounded p-2" />
+        </Form.Item>
+        <Form.Item
+          label="Course"
+          name="fCourse"
+          rules={[{ required: true, message: 'Please input the course!' }]}
+        >
+          <Input className="border border-gray-300 rounded p-2" />
+        </Form.Item>
+        <Form.Item>
+          <Button type="primary" htmlType="submit" className="w-full bg-blue-500 hover:bg-blue-600 text-white">
+            Add Employee
+          </Button>
+        </Form.Item>
+      </Form>
+      {responseData && (
+        <div className="mt-4">
+          <h2 className="text-lg font-semibold">Employee Added:</h2>
+          <pre className="bg-gray-100 p-4 rounded">{JSON.stringify(responseData, null, 2)}</pre>
         </div>
-    );
+      )}
+      {error && <div className="mt-4 text-red-500">Error: {error}</div>}
+    </div>
+  );
 };
 
 export default EmployeeForm;

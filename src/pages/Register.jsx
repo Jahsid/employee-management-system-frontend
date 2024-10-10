@@ -1,21 +1,22 @@
 import { useState } from 'react';
 import { Form, Input, Button, Card, message } from 'antd';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 
-const Login = () => {
+const Register = () => {
     const [loading, setLoading] = useState(false);
-    const navigate = useNavigate();
+    const navigate = useNavigate(); // Initialize navigate
 
     const onFinish = async (values) => {
         setLoading(true);
         try {
-            const response = await axios.post('http://localhost:5000/api/login', values);
+            const response = await axios.post('http://localhost:5000/api/register', values);
             message.success(response.data.message);
-            localStorage.setItem('f_Name', response.data.user.f_Name);
-            navigate('/dashboard');
+            
+            // Navigate to login page after successful registration
+            navigate('/login');
         } catch (error) {
-            message.error('Login failed');
+            message.error('Registration failed');
         } finally {
             setLoading(false);
         }
@@ -24,9 +25,9 @@ const Login = () => {
     return (
         <div className="flex justify-center items-center h-screen bg-gray-100">
             <Card className="w-96 shadow-lg">
-                <h2 className="text-2xl font-bold mb-4 text-center">Login</h2>
+                <h2 className="text-2xl font-bold mb-4 text-center">Register</h2>
                 <Form
-                    name="login"
+                    name="register"
                     onFinish={onFinish}
                     layout="vertical"
                 >
@@ -53,7 +54,7 @@ const Login = () => {
                             loading={loading}
                             block
                         >
-                            Login
+                            Register
                         </Button>
                     </Form.Item>
                 </Form>
@@ -62,4 +63,4 @@ const Login = () => {
     );
 };
 
-export default Login;
+export default Register;
