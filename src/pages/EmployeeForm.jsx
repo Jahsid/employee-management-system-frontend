@@ -1,27 +1,41 @@
 import { useState } from 'react';
-import { Form, Input, Button, message } from 'antd';
+import { Form, Input, Button, message, Select, Radio, Checkbox, Upload } from 'antd';
+import { useNavigate } from 'react-router-dom';
+import { UploadOutlined } from '@ant-design/icons';
+
+const { Option } = Select;
 
 const EmployeeForm = () => {
   const [responseData, setResponseData] = useState(null);
   const [error, setError] = useState(null);
+  const [fileList, setFileList] = useState([]);
+  const navigate = useNavigate();
+
+  const handleFileChange = ({ fileList }) => {
+    setFileList(fileList);
+  };
 
   const handleSubmit = async (values) => {
-    const employeeData = {
-      f_Name: values.fName,
-      f_Email: values.fEmail,
-      f_Mobile: values.fMobile,
-      f_Designation: values.fDesignation,
-      f_gender: values.fGender,
-      f_Course: values.fCourse,
-    };
+    const formData = new FormData();
+    
+    formData.append('f_Name', values.fName);
+    formData.append('f_Email', values.fEmail);
+    formData.append('f_Mobile', values.fMobile);
+    formData.append('f_Designation', values.fDesignation);
+    formData.append('f_gender', values.fGender);
+    formData.append('f_Course', values.fCourse);
+
+    if (fileList.length > 0) {
+      formData.append('f_Image', fileList[0].originFileObj);
+    } else {
+      message.error('Please upload an image');
+      return;
+    }
 
     try {
       const response = await fetch('http://localhost:5000/api/employees', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(employeeData),
+        body: formData
       });
 
       if (!response.ok) {
@@ -31,6 +45,8 @@ const EmployeeForm = () => {
       const data = await response.json();
       setResponseData(data);
       message.success('Employee added successfully!');
+      
+      navigate('/employees');
     } catch (error) {
       setError(error.message);
       message.error(`Error: ${error.message}`);
@@ -71,34 +87,55 @@ const EmployeeForm = () => {
           name="fDesignation"
           rules={[{ required: true, message: 'Please input the designation!' }]}
         >
-          <Input className="border border-gray-300 rounded p-2" />
+          <Select placeholder="Select designation">
+            <Option value="HR">HR</Option>
+            <Option value="Manager">Manager</Option>
+            <Option value="Sales">Sales</Option>
+          </Select>
         </Form.Item>
         <Form.Item
           label="Gender"
           name="fGender"
-          rules={[{ required: true, message: 'Please input the gender!' }]}
+          rules={[{ required: true, message: 'Please select the gender!' }]}
         >
-          <Input className="border border-gray-300 rounded p-2" />
+          <Radio.Group>
+            <Radio value="Male">Male</Radio>
+            <Radio value="Female">Female</Radio>
+          </Radio.Group>
         </Form.Item>
         <Form.Item
           label="Course"
           name="fCourse"
-          rules={[{ required: true, message: 'Please input the course!' }]}
+          rules={[{ required: true, message: 'Please select the course!' }]}
         >
-          <Input className="border border-gray-300 rounded p-2" />
+          <Checkbox.Group>
+            <Checkbox value="MCA">MCA</Checkbox>
+            <Checkbox value="BCA">BCA</Checkbox>
+            <Checkbox value="BSC">BSC</Checkbox>
+          </Checkbox.Group>
         </Form.Item>
+        
+        <Form.Item
+          label="Upload Image"
+          name="f_Image"
+          rules={[{ required: true, message: 'Please upload an image!' }]}
+        >
+          <Upload 
+            beforeUpload={() => false}
+            fileList={fileList}
+            onChange={handleFileChange}
+          >
+            <Button icon={<UploadOutlined />}>Click to Upload</Button>
+          </Upload>
+        </Form.Item>
+
         <Form.Item>
           <Button type="primary" htmlType="submit" className="w-full bg-blue-500 hover:bg-blue-600 text-white">
             Add Employee
           </Button>
         </Form.Item>
       </Form>
-      {responseData && (
-        <div className="mt-4">
-          <h2 className="text-lg font-semibold">Employee Added:</h2>
-          <pre className="bg-gray-100 p-4 rounded">{JSON.stringify(responseData, null, 2)}</pre>
-        </div>
-      )}
+     
       {error && <div className="mt-4 text-red-500">Error: {error}</div>}
     </div>
   );

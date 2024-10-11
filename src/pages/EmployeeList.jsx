@@ -7,7 +7,6 @@ const EmployeeList = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Fetch employee data from the backend
     const fetchEmployees = async () => {
       try {
         const response = await fetch('http://localhost:5000/api/employees');
@@ -36,6 +35,7 @@ const EmployeeList = () => {
 
   const columns = [
     { title: 'Unique ID', dataIndex: 'f_Id', key: 'f_Id' },
+    { title: 'Image', dataIndex: 'f_Image', key: 'f_Image' },
     { title: 'Name', dataIndex: 'f_Name', key: 'f_Name' },
     { title: 'Email', dataIndex: 'f_Email', key: 'f_Email' },
     { title: 'Mobile', dataIndex: 'f_Mobile', key: 'f_Mobile' },
@@ -47,7 +47,7 @@ const EmployeeList = () => {
       key: 'action',
       render: (text, record) => (
         <>
-          <Link to={`/employee/edit/${record.id}`}>
+          <Link to={`/employee/edit/${record.f_Id}`}>
             <Button type="link">Edit</Button>
           </Link>
           <Button type="link" danger onClick={() => handleDelete(record.f_Id)}>
